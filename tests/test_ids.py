@@ -57,3 +57,19 @@ def test_relation_types_split_camel_case():
     assert ids.normalize_rel_type("WORKS_AT") == "WORKS_AT"
     assert ids.normalize_rel_type("works at") == "WORKS_AT"
     assert ids.relation_id("a:b", "worksAt", "c:d") == ids.relation_id("a:b", "WORKS_AT", "c:d")
+
+
+def test_require_clean_json_rejects_non_finite_floats():
+    for bad in (float("nan"), float("inf"), float("-inf")):
+        with pytest.raises(ValidationError, match="NaN or Infinity"):
+            ids._require_clean_json("field", {"k": bad})
+
+
+def test_require_clean_json_rejects_unsupported_types():
+    for bad in ({1, 2, 3}, b"raw", 1 + 2j):
+        with pytest.raises(ValidationError):
+            ids._require_clean_json("field", {"k": bad})
+
+
+def test_require_clean_json_accepts_json_native_values():
+    ids._require_clean_json("field", {"s": "x", "i": 5, "f": 1.5, "b": True, "n": None, "l": [1, "a"], "m": {"x": 1}})

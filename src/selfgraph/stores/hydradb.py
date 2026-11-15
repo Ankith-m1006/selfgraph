@@ -114,7 +114,7 @@ def _removes(alias: str, keys: tuple[str, ...]) -> str:
 
 
 def _doc(props: Mapping[str, Any]) -> str:
-    return json.dumps(dict(props), default=str)
+    return json.dumps(dict(props), default=str, allow_nan=False)
 
 
 def _same(alias: str, key: str, param: str) -> str:

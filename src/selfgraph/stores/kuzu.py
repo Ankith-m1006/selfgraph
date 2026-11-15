@@ -81,7 +81,7 @@ def _pk(ns: str, id: str) -> str:
 
 
 def _jv(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=False, default=str)
+    return json.dumps(value, ensure_ascii=False, default=str, allow_nan=False)
 
 
 _BY_SID = "MATCH (a:N)-[r:R]->(b:N) WHERE r.ns = $ns AND r.sid = $sid"

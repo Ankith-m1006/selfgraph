@@ -78,9 +78,14 @@ def _require_clean_json(name: str, value: object, depth: int = 0, *, safe_ints: 
     if isinstance(value, str):
         if _unstorable(value):
             raise ValidationError(f"{name} values cannot contain NUL or unpaired surrogate characters")
-    elif isinstance(value, int) and not isinstance(value, bool):
+    elif isinstance(value, bool):
+        pass
+    elif isinstance(value, int):
         if safe_ints and abs(value) > MAX_SAFE_INTEGER:
             raise ValidationError(f"{name} integer {value} is outside the safe range; store it as a string")
+    elif isinstance(value, float):
+        if not math.isfinite(value):
+            raise ValidationError(f"{name} cannot hold NaN or Infinity; store a finite number or a string")
     elif isinstance(value, date):
         raise ValidationError(f"{name} cannot hold {type(value).__name__} values; use an ISO 8601 string")
     elif isinstance(value, Mapping):
@@ -91,6 +96,8 @@ def _require_clean_json(name: str, value: object, depth: int = 0, *, safe_ints: 
     elif isinstance(value, list | tuple):
         for item in value:
             _require_clean_json(name, item, depth + 1, safe_ints=safe_ints)
+    elif value is not None:
+        raise ValidationError(f"{name} cannot hold {type(value).__name__} values; use a JSON-native type")
 
 
 def _require_str(label: str, value: object) -> None:
