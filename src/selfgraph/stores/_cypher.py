@@ -718,8 +718,9 @@ class CypherPrimitives(CypherRunner):
         @return (list[dict]): child property maps.
         """
         order = f" ORDER BY c.{order_by}" if order_by else ""
+        rel = quote_reltype(edge_type)
         res = await self._run(
-            f"MATCH (p:{parent_label} {{id:$id, ns:$ns}})-[:{edge_type}]->(c:{child_label}) RETURN c{order}",
+            f"MATCH (p:{parent_label} {{id:$id, ns:$ns}})-[:{rel}]->(c:{child_label}) RETURN c{order}",
             {"id": parent_id, "ns": ns},
         )
         return [r["c"] for r in res.rows]
@@ -733,6 +734,6 @@ class CypherPrimitives(CypherRunner):
         @param type (str): edge type to delete.
         """
         await self._run(
-            f"MATCH (t:{label} {{id:$id, ns:$ns}}) MATCH (x)-[e:{type}]-(t) DELETE e",
+            f"MATCH (t:{label} {{id:$id, ns:$ns}}) MATCH (x)-[e:{quote_reltype(type)}]-(t) DELETE e",
             {"id": id, "ns": ns},
         )
